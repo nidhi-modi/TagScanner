@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".nfcActivity"
+    android:layout_margin="@dimen/_10sdp"
+    android:background="@drawable/tandg_background_image"
+    android:orientation="vertical">
+    
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:src="@drawable/nfc_image"/>
+
+    <Button
+        android:id="@+id/btnReadId"
+        android:layout_width="match_parent"
+        android:layout_marginTop="@dimen/_20sdp"
+        android:layout_height="@dimen/_40sdp"
+        android:background="@drawable/my_button"
+        android:layout_marginBottom="@dimen/_20sdp"
+        android:text="@string/read"
+        android:textColor="@color/white"
+        android:textSize="@dimen/_13sdp"
+        android:fontFamily="sans-serif-condensed-medium"
+        android:textStyle="bold"/>
+
+    <Button
+        android:id="@+id/btnWriteId"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/_40sdp"
+        android:layout_marginTop="@dimen/_10sdp"
+        android:background="@drawable/my_button"
+        android:layout_marginBottom="@dimen/_20sdp"
+        android:text="@string/write"
+        android:textColor="@color/white"
+        android:textSize="@dimen/_13sdp"
+        android:fontFamily="sans-serif-condensed-medium"
+        android:textStyle="bold"/>
+
+
+</LinearLayout>

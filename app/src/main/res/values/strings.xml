@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">TagScanner</string>
+    <string name="title_name">T&amp;G Fresh</string>
+
+    <string name="read">Read RFID</string>
+    <string name="write">Write RFID</string>
+
+</resources>
