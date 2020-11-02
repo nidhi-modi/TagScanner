@@ -27,7 +27,10 @@ import android.widget.Toast;
 
 import com.google.android.material.textfield.TextInputLayout;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.Locale;
 
 public class WriteNfc extends AppCompatActivity {
 
@@ -74,7 +77,6 @@ public class WriteNfc extends AppCompatActivity {
             }
 
 
-
         });
 
 
@@ -91,7 +93,7 @@ public class WriteNfc extends AppCompatActivity {
         mWriteMode = false;
         mNfcAdapter.disableForegroundDispatch(this);
 
-        Log.e(TAG, "Foreground is disabled and status of scanning : "+isScanningStopped );
+        Log.e(TAG, "Foreground is disabled and status of scanning : " + isScanningStopped);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
@@ -100,25 +102,74 @@ public class WriteNfc extends AppCompatActivity {
         // Tag writing mode
         if (mWriteMode && NfcAdapter.ACTION_TAG_DISCOVERED.equals(intent.getAction())) {
             Tag detectedTag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-            NdefRecord record = NdefRecord.createMime(mergedData, mergedData.getBytes());
-            NdefMessage message = new NdefMessage(new NdefRecord[]{record});
+
+            try {
+                byte[] lang = Locale.getDefault().getLanguage().getBytes("UTF-8");
+                byte[] text = mergedData.getBytes("UTF-8"); // Content in UTF-8
+                int langSize = lang.length;
+                int textLength = text.length;
+
+                ByteArrayOutputStream payload = new ByteArrayOutputStream(1 + langSize + textLength);
+                payload.write((byte) (langSize & 0x1F));
+                payload.write(lang, 0, langSize);
+                payload.write(text, 0, textLength);
+
+                NdefRecord record = new NdefRecord(NdefRecord.TNF_WELL_KNOWN,
+                        NdefRecord.RTD_TEXT, new byte[0],
+                        payload.toByteArray());
+
+                NdefMessage message = new NdefMessage(new NdefRecord[]{record});
 
 
+                if (writeTag(message, detectedTag)) {
 
-            if (writeTag(message, detectedTag)) {
+                    String intIncrease = ((TextView) findViewById(R.id.edt_interval_increase)).getText().toString();
 
-                String intIncrease = ((TextView) findViewById(R.id.edt_interval_increase)).getText().toString();
+                    int rowNum = Integer.parseInt(intIncrease) + Integer.parseInt(number);
 
-                int rowNum = Integer.parseInt(intIncrease) + Integer.parseInt(number);
+                    incrementRow = Integer.toString(rowNum);
 
-                incrementRow = Integer.toString(rowNum);
+                    ((TextView) findViewById(R.id.edt_starting_number)).setText(incrementRow);
 
-                ((TextView) findViewById(R.id.edt_starting_number)).setText(incrementRow);
+                    Log.e(TAG, "onNewIntent: " + isScanningStopped);
 
-                Log.e(TAG, "onNewIntent: "+isScanningStopped );
+                }
+
+            }catch (Exception e){
+
+                e.printStackTrace();
 
             }
+
+            //NdefRecord record = NdefRecord.createMime(String.valueOf(NdefRecord.TNF_WELL_KNOWN), mergedData.getBytes(Charset.forName("US-ASCII")));
+            //NdefMessage message = new NdefMessage(new NdefRecord[]{record});
+
+
+
         }
+    }
+
+    public NdefMessage createTextMessage(String content) {
+        try {
+            // Get UTF-8 byte
+            byte[] lang = Locale.getDefault().getLanguage().getBytes("UTF-8");
+            byte[] text = content.getBytes("UTF-8"); // Content in UTF-8
+            int langSize = lang.length;
+            int textLength = text.length;
+
+            ByteArrayOutputStream payload = new ByteArrayOutputStream(1 + langSize + textLength);
+            payload.write((byte) (langSize & 0x1F));
+            payload.write(lang, 0, langSize);
+            payload.write(text, 0, textLength);
+            NdefRecord record = new NdefRecord(NdefRecord.TNF_WELL_KNOWN,
+                    NdefRecord.RTD_TEXT, new byte[0],
+                    payload.toByteArray());
+            return new NdefMessage(new NdefRecord[]{record});
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 
 
@@ -126,7 +177,7 @@ public class WriteNfc extends AppCompatActivity {
 
         text = ((TextView) findViewById(R.id.edt_starting_text)).getText().toString().trim();
 
-        Log.e(TAG, "validateStartingText: "+text );
+        Log.e(TAG, "validateStartingText: " + text);
 
         if (text != null && text.length() > 0) {
 
@@ -187,22 +238,22 @@ public class WriteNfc extends AppCompatActivity {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(WriteNfc.this);
         builder.setTitle("Touch tag to write");
-        builder.setMessage("Scanning Tag ID : "+text+""+number+"\n"+"Press continue after scanning");
+        builder.setMessage("Scanning Tag ID : " + text + "" + number + "\n" + "Press continue after scanning");
         builder.setCancelable(false);
         builder.setPositiveButton("Continue", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
 
-                        disableTagWriteMode();
-                        isScanningStopped = false;
+                disableTagWriteMode();
+                isScanningStopped = false;
 
-                        if(!isScanningStopped){
+                if (!isScanningStopped) {
 
-                            validateStartingText();
+                    validateStartingText();
 
-                        }
+                }
 
-                    }
+            }
 
         });
         builder.setNegativeButton("Stop Scanning", new DialogInterface.OnClickListener() {
