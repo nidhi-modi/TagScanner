@@ -45,6 +45,8 @@ public class WriteNfc extends AppCompatActivity {
 
     String text, number, interval, mergedData;
 
+    int leadingZeroes;
+
     boolean mWriteMode = false;
     private NfcAdapter mNfcAdapter;
     private PendingIntent mNfcPendingIntent;
@@ -57,6 +59,17 @@ public class WriteNfc extends AppCompatActivity {
 
         initResources();
 
+    }
+
+    public static int leadingZerosCount(String s){
+        int zeros=0;
+        for(int i=0;i<3 && i<s.length();i++) {
+            if(s.charAt(i)=='0')
+                zeros++;
+            else
+                break;
+        }
+        return zeros;
     }
 
     public void initResources() {
@@ -123,17 +136,91 @@ public class WriteNfc extends AppCompatActivity {
 
                 if (writeTag(message, detectedTag)) {
 
-                    String intIncrease = ((TextView) findViewById(R.id.edt_interval_increase)).getText().toString();
 
-                    int rowNum = Integer.parseInt(intIncrease) + Integer.parseInt(number);
+                    if(leadingZeroes == 2){
 
-                    incrementRow = Integer.toString(rowNum);
+                        String intIncrease = ((TextView) findViewById(R.id.edt_interval_increase)).getText().toString();
 
-                    ((TextView) findViewById(R.id.edt_starting_number)).setText(incrementRow);
+                        String appendedIntIncrease = "00"+""+intIncrease;
 
-                    Log.e(TAG, "onNewIntent: " + isScanningStopped);
+                        Log.e(TAG, "onNewIntent: "+appendedIntIncrease );
 
-                }
+                        int rowNum = Integer.parseInt(appendedIntIncrease) + Integer.parseInt(number);
+
+                        incrementRow = Integer.toString(rowNum);
+
+                        if(incrementRow.length() == 1){
+
+                            String one = "00"+""+incrementRow;
+
+                            ((TextView) findViewById(R.id.edt_starting_number)).setText(one);
+
+
+                        }else if(incrementRow.length() == 2){
+
+                            String two = "0"+""+incrementRow;
+
+                            ((TextView) findViewById(R.id.edt_starting_number)).setText(two);
+
+
+                        }else {
+
+                            ((TextView) findViewById(R.id.edt_starting_number)).setText(incrementRow);
+
+                        }
+
+
+                        Log.e(TAG, "onNewIntent: " + isScanningStopped);
+
+
+                    }else if (leadingZeroes == 1){
+
+                        String intIncrease = ((TextView) findViewById(R.id.edt_interval_increase)).getText().toString();
+
+                        String appendedIntIncrease = "0"+""+intIncrease;
+
+                        int rowNum = Integer.parseInt(appendedIntIncrease) + Integer.parseInt(number);
+
+                        incrementRow = Integer.toString(rowNum);
+
+                        if(incrementRow.length() == 1){
+
+                            String one = "00"+""+incrementRow;
+
+                            ((TextView) findViewById(R.id.edt_starting_number)).setText(one);
+
+
+                        }else if(incrementRow.length() == 2){
+
+                            String two = "0"+""+incrementRow;
+
+                            ((TextView) findViewById(R.id.edt_starting_number)).setText(two);
+
+
+                        }else {
+
+                            ((TextView) findViewById(R.id.edt_starting_number)).setText(incrementRow);
+
+                        }
+
+                    }else {
+
+                        String intIncrease = ((TextView) findViewById(R.id.edt_interval_increase)).getText().toString();
+
+                        int rowNum = Integer.parseInt(intIncrease) + Integer.parseInt(number);
+
+                        incrementRow = Integer.toString(rowNum);
+
+                        ((TextView) findViewById(R.id.edt_starting_number)).setText(incrementRow);
+
+                        Log.e(TAG, "onNewIntent: " + isScanningStopped);
+
+                    }
+
+
+                    }
+
+
 
             }catch (Exception e){
 
@@ -195,6 +282,8 @@ public class WriteNfc extends AppCompatActivity {
     private void validateStartingNumber() {
 
         number = ((TextView) findViewById(R.id.edt_starting_number)).getText().toString().trim();
+
+        leadingZeroes = leadingZerosCount(number);
 
         if (number != null && number.length() > 0) {
 
